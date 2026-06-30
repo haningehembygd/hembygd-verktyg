@@ -7,7 +7,7 @@ name = "hembygd-verktyg"
 version = "0.1.0"
 description = "Verktyg för att hämta, organisera och publicera digitala arkiv och öppna data för hembygdsföreningar."
 readme = "README.md"
-requires-python = ">=3.11"
+requires-python = ">=3.12"
 license = { text = "MIT" }
 
 authors = [
@@ -26,18 +26,18 @@ keywords = [
     "scraper",
     "github",
     "pdf",
-    "öppna data",
     "kulturarv",
-    "historia"
+    "historia",
+    "öppna data"
 ]
 
 classifiers = [
     "Development Status :: 3 - Alpha",
+    "Intended Audience :: Developers",
+    "Topic :: Utilities",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
-    "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
 ]
 
@@ -62,13 +62,16 @@ dev = [
     "pytest-cov>=6.0",
 ]
 
+[project.scripts]
+hembygd = "archive.main:main"
+
 [tool.black]
 line-length = 100
-target-version = ["py311"]
+target-version = ["py312"]
 
 [tool.ruff]
 line-length = 100
-target-version = "py311"
+target-version = "py312"
 
 [tool.ruff.lint]
 select = [
