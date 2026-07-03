@@ -2,17 +2,69 @@
 
 Hembygd Verktyg är ett open source-projekt från Haninge Hembygdsgille.
 
-Projektets mål är att utveckla moderna verktyg för digitalisering, import, organisering och publicering av kulturhistoriskt material.
-
-## Funktioner
-
-- Import av dokument från Hembygd.se
-- Automatisk organisering av arkiv
-- Generering av README-filer
-- Export till JSON
-- Publicering till GitHub
-- Stöd för framtida API:er
+Projektets mål är att utveckla moderna verktyg för digitalisering, import,
+organisering och publicering av kulturhistoriskt material.
 
 ## Status
 
-🚧 Under utveckling
+Projektet är i en tidig utvecklingsfas. Den tekniska grunden, dokumentationen och
+ett minimalt kommandoradsgränssnitt finns på plats. Funktionerna för import,
+organisering och publicering är ännu inte implementerade.
+
+Det nuvarande kommandot verifierar installationen:
+
+```console
+$ hembygd
+Hembygd Verktyg
+```
+
+## Planerade funktioner
+
+- import av dokument från Hembygd.se och andra informationskällor
+- automatisk organisering av digitala arkiv
+- generering av README-filer och index
+- export till JSON och andra öppna format
+- publicering till GitHub och webbplatser
+- stöd för framtida API:er och integrationer
+
+## Teknisk grund
+
+- Python 3.13 eller senare
+- lagerindelad arkitektur
+- Ruff för lintning och Python-formatering
+- pytest för automatiserade tester
+- Prettier för Markdown, JSON och YAML i VS Code
+
+Projektets centrala domänobjekt är `Site`, `Entry`, `EntryType`, `Document`,
+`Asset` och `Metadata`. Se [domänmodellen](docs/DOMAIN_MODEL.md) och
+[arkitekturen](docs/ARCHITECTURE.md) för detaljer.
+
+## Kom igång
+
+Skapa en virtuell miljö och installera projektets utvecklingsverktyg:
+
+```bash
+python3.13 -m venv .venv
+.venv/bin/python -m pip install --editable ".[dev]"
+```
+
+Kör kvalitetskontrollerna:
+
+```bash
+.venv/bin/python -m ruff check .
+.venv/bin/python -m ruff format --check .
+.venv/bin/python -m pytest
+```
+
+VS Code-användare kan också använda projektets rekommenderade tillägg och
+uppgifter i `.vscode/`.
+
+Mer information finns i [utvecklingsguiden](docs/DEVELOPMENT.md).
+
+## Bidra
+
+Läs [CONTRIBUTING.md](CONTRIBUTING.md) innan du föreslår en ändring.
+
+## Licens
+
+Projektet distribueras under [Apache License 2.0](LICENSE).

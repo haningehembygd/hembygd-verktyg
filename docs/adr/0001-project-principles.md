@@ -1,6 +1,6 @@
 # ADR-0001 – Projektprinciper
 
-**Status:** Accepterad  
+**Status:** Accepterad
 **Datum:** 2026-06-30
 
 ---
@@ -21,7 +21,7 @@ Detta dokument beskriver de grundprinciper som hela projektet ska följa.
 
 Projektet utvecklas i modern Python.
 
-- Minsta version: Python 3.12
+- Minsta version: Python 3.13
 - Type hints används överallt.
 - Modern Python-syntax används konsekvent.
 

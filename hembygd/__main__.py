@@ -1,4 +1,4 @@
-from hembygd.cli import main
+from hembygd.presentation.cli import main
 
 if __name__ == "__main__":
     main()

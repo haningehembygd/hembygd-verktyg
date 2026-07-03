@@ -1,307 +1,235 @@
 # ARCHITECTURE
 
-**Version:** 0.1  
-**Status:** Utkast
+**Version:** 0.2
+**Status:** Godkänd
 
 ---
 
-# Översikt
+# Syfte
 
-Hembygd Verktyg är byggt som ett modulärt ramverk där varje komponent har ett tydligt och avgränsat ansvar.
+Hembygd Verktyg använder en lagerindelad arkitektur med domänmodellen som
+systemets stabila kärna.
 
-Grundprincipen är:
-
-> **En komponent ska göra en sak – och göra den väl.**
-
-Systemet består av en kärna ("Core") och ett antal fristående moduler.
+Arkitekturen ska göra det möjligt att lägga till nya informationskällor,
+arbetsflöden och exportformat utan att domänmodellen kopplas till HTML, HTTP,
+filsystem eller andra tekniska detaljer.
 
 ---
 
-# Övergripande arkitektur
+# Arkitekturöversikt
 
 ```text
-                 CLI
-                  │
-                  ▼
-            Application
-                  │
-      ┌───────────┼───────────┐
-      ▼           ▼           ▼
- Parser       Downloader   Organizer
-      │                       │
-      ▼                       ▼
-  Models                Exporters
-      │                       │
-      └──────────────┬────────┘
-                     ▼
-                 Output
+                    Presentation
+                        CLI
+                         │
+                         ▼
+                    Application
+                     Workflows
+                         │
+                         ▼
+                       Domain
+        Site ──► Entry ──┬──► Document
+                         └──► Asset
+                              Metadata
+                         ▲
+                         │
+                  Infrastructure
+          Parsers · Downloaders · Exporters
 ```
 
-Varje modul ansvarar endast för sin egen uppgift.
+Pilar nedåt visar hur ett användningsfall anropas. Infrastructure ansluter till
+de gränssnitt som arbetsflödena behöver och översätter teknisk information till
+och från domänobjekt.
 
-Ingen modul ska känna till hur andra moduler är implementerade.
-
----
-
-# Designprinciper
-
-Projektet bygger på följande principer:
-
-- Single Responsibility Principle
-- Separation of Concerns
-- Modulär design
-- Hög testbarhet
-- Låg koppling mellan moduler
-- Tydliga datamodeller
-- Utbyggbarhet genom nya parsermoduler
+Domänlagret importerar aldrig från något annat projektlager.
 
 ---
 
-# Komponenter
+# Lager
 
-## CLI
+## Presentation
 
-CLI är programmets användargränssnitt.
+Presentation är systemets gränssnitt mot användaren.
 
 Ansvar:
 
 - läsa kommandoradsargument
-- starta rätt arbetsflöde
-- visa status
-- visa felmeddelanden
+- validera indata på gränssnittsnivå
+- starta rätt application-arbetsflöde
+- presentera resultat och felmeddelanden
 
-CLI innehåller ingen affärslogik.
+Presentation innehåller ingen affärslogik och arbetar inte direkt med
+infrastruktur.
 
 ---
 
 ## Application
 
-Application samordnar programmets arbetsflöde.
+Application beskriver och samordnar systemets användningsfall.
 
 Ansvar:
 
-- skapa objekt
-- starta rätt parser
-- koordinera nedladdning
-- koordinera export
+- koordinera import, nedladdning, organisering och export
+- definiera de gränssnitt som externa komponenter behöver uppfylla
+- hantera transaktions- och arbetsflödesgränser
+- returnera tydliga resultat till presentation
 
-Application ska inte känna till HTML eller filformat.
+Application använder domänobjekt men innehåller inga regler för HTML, HTTP eller
+specifika filformat.
 
 ---
 
+## Domain
+
+Domain innehåller projektets verksamhetsbegrepp och regler.
+
+De centrala objekten är:
+
+- `Site`
+- `Entry`
+- `EntryType`
+- `Document`
+- `Asset`
+- `Metadata`
+
+`Entry` är den gemensamma representationen för exempelvis möten, evenemang,
+nyheter, publikationer, artiklar och informationssidor. Skillnaden uttrycks med
+`EntryType`; separata domänmodeller som `Meeting` och `Page` används därför inte.
+
+Den fullständiga modellen definieras i `docs/DOMAIN_MODEL.md`.
+
+---
+
+## Infrastructure
+
+Infrastructure innehåller tekniska adaptrar.
+
+Exempel:
+
+- webbplatsspecifika parsers
+- HTTP-klienter och nedladdare
+- filsystemslagring
+- JSON-, Markdown- och CSV-exporters
+- integrationer med GitHub och externa API:er
+
+Infrastructure får bero på application och domain. Lagret innehåller inga
+affärsregler.
+
+---
+
+# Komponentansvar
+
 ## Parser
 
-Parsern analyserar en webbplats.
+En parser översätter data från en extern informationskälla till domänobjekt.
 
-Ansvar:
+En parser får:
 
-- läsa HTML
-- identifiera objekt
-- skapa datamodeller
+- läsa och analysera källans representation
+- tolka källspecifik metadata
+- skapa `Site`, `Entry`, `Document` och `Asset`
 
-Parsern laddar aldrig ned dokument.
+En parser får inte:
 
-Parsern skriver aldrig filer.
-
-Parsern returnerar endast objekt.
+- skriva filer
+- organisera kataloger
+- ladda ned dokument
+- exponera HTML eller källspecifika datastrukturer till andra lager
 
 ---
 
 ## Downloader
 
-Downloader ansvarar endast för filhämtning.
+En downloader hämtar innehåll som beskrivs av domänobjekt.
 
-Ansvar:
-
-- ladda ned filer
-- verifiera filstorlek
-- verifiera checksumma
-- spara filer
-
-Downloader analyserar aldrig HTML.
+Den får hantera HTTP, filstorlek och kontrollsummor men får inte analysera HTML
+eller besluta hur material ska kategoriseras.
 
 ---
 
 ## Organizer
 
-Organizer ansvarar för katalogstrukturen.
+En organizer bygger den önskade katalogstrukturen utifrån domänobjekt.
 
-Ansvar:
-
-- skapa mappar
-- flytta filer
-- skapa README.md
-- skapa index
-
-Organizer hämtar aldrig information från internet.
+Den får skapa kataloger, placera filer och generera index, men hämtar inte data
+från externa källor.
 
 ---
 
-## Exporters
+## Exporter
 
-Exporters omvandlar data till olika format.
+En exporter omvandlar domänobjekt till ett publiceringsformat, exempelvis JSON,
+Markdown, CSV eller GitHub Pages-innehåll.
 
-Exempel:
-
-- JSON
-- Markdown
-- CSV
-- GitHub Pages
-- API-data
-
-Exporters känner inte till hur informationen hämtades.
+En exporter känner inte till hur informationen ursprungligen hämtades.
 
 ---
 
-# Datamodeller
+# Paketstruktur
 
-Projektets datamodeller utgör kärnan i systemet.
+```text
+hembygd/
+├── presentation/     # CLI och framtida användargränssnitt
+├── application/      # Användningsfall och komponentgränssnitt
+├── domain/           # Domänobjekt och affärsregler
+└── infrastructure/   # Parsers, nedladdare, lagring och exporters
+```
 
-Till en början används följande modeller:
-
-- Site
-- Page
-- Meeting
-- Document
-
-Alla övriga komponenter arbetar mot dessa modeller.
-
----
-
-## Site
-
-Beskriver en informationskälla.
-
-Exempel:
-
-- Hembygd.se
-- WordPress
-- Kommunwebbplats
+Nya undermoduler skapas först när ett konkret användningsfall behöver dem.
+Generella kataloger som `core` och generella `utils`-moduler undviks eftersom de
+saknar en tydlig arkitektonisk gräns.
 
 ---
 
-## Page
+# Beroenderegler
 
-Representerar en hämtad HTML-sida.
-
-Innehåller:
-
-- URL
-- titel
-- HTML
-- metadata
-
----
-
-## Meeting
-
-Representerar ett möte eller en aktivitet.
-
-Exempel:
-
-- årsmöte
-- styrelsemöte
-- evenemang
-
-Ett Meeting innehåller ett antal Document.
+- Domain har inga beroenden till övriga projektlager.
+- Application får bero på domain.
+- Presentation får bero på application och på domäntyper som behövs för visning.
+- Infrastructure får bero på application och domain.
+- Presentation och application får inte importera konkreta infrastructure-adaptrar
+  annat än i en avgränsad sammansättningspunkt.
+- Kommunikation mellan komponenter sker med domänobjekt och uttryckliga
+  gränssnitt, inte med HTML eller godtyckliga dictionaries.
 
 ---
 
-## Document
+# Sammansättning
 
-Representerar ett dokument.
-
-Exempel:
-
-- PDF
-- Word
-- Excel
-
-Document innehåller metadata och eventuell lokal fil.
-
----
-
-# Arbetsflöde
-
-Normalt arbetsflöde:
-
-1. CLI startas.
-2. Application skapas.
-3. Parser väljs.
-4. Parser analyserar webbplatsen.
-5. Datamodeller skapas.
-6. Downloader hämtar dokument.
-7. Organizer bygger katalogstruktur.
-8. Exporters genererar önskat resultat.
-
----
-
-# Parserarkitektur
-
-Varje webbplats implementeras som en egen parser.
-
-Exempel:
-
-- HembygdParser
-- WordpressParser
-- HaningeParser
-
-Alla parserklasser ska implementera samma gemensamma gränssnitt.
-
-Det gör att nya webbplatser kan stödjas utan att övriga delar av systemet behöver ändras.
+Programmets startpunkt ansvarar för att skapa konkreta infrastructure-adaptrar
+och koppla dem till application-arbetsflöden. Denna sammansättning hålls nära
+presentationens startpunkt och innehåller ingen affärslogik.
 
 ---
 
 # Felhantering
 
-Fel ska hanteras så nära källan som möjligt.
+Fel hanteras där de kan beskrivas meningsfullt:
 
-Programmet ska:
+- Infrastructure översätter tekniska fel till tydliga komponentfel.
+- Application avgör om ett arbetsflöde kan fortsätta eller måste avbrytas.
+- Presentation visar ett begripligt meddelande och en korrekt slutstatus.
 
-- fortsätta när det är möjligt
-- logga alla fel
-- ge tydliga felmeddelanden
-- aldrig avsluta utan förklaring
-
----
-
-# Testbarhet
-
-Alla komponenter ska kunna testas separat.
-
-Det ska vara möjligt att testa:
-
-- parsern
-- downloadern
-- organizern
-- exporters
-
-utan att behöva köra hela programmet.
+Fel får aldrig ignoreras utan loggning eller förklaring.
 
 ---
 
-# Framtida utbyggnad
+# Teststrategi
 
-Arkitekturen är avsedd att kunna växa.
+- Domain testas med snabba enhetstester utan externa resurser.
+- Application testas mot enkla testimplementationer av sina gränssnitt.
+- Infrastructure testas med avgränsad testdata och integrationstester.
+- Presentation testas genom CLI-anrop och verifiering av slutstatus och utdata.
 
-Planerade utbyggnader inkluderar:
-
-- stöd för flera webbplatser
-- GitHub-publicering
-- Google Sheets
-- öppna API:er
-- GIS- och kartdata
-- bildhantering
-- OCR
-- AI-baserad metadataanalys
-- Home Assistant-integration
+Varje lager ska kunna testas utan att hela systemet behöver startas.
 
 ---
 
 # Arkitekturprincip
 
-All information ska passera genom datamodellerna.
+Externa representationer översätts vid systemets gräns. När information har
+kommit in i systemet representeras den av de objekt som definieras i
+domänmodellen.
 
-Ingen komponent får kommunicera direkt med en annan genom HTML, filer eller egna datastrukturer.
-
-Detta gör systemet enklare att testa, underhålla och vidareutveckla.
+Detta håller kärnan stabil, gör adaptrar utbytbara och låter projektet växa utan
+att webbplatsspecifika detaljer sprids genom koden.
