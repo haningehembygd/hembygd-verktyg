@@ -12,8 +12,21 @@ $ hembygd
 Hembygd Verktyg
 ```
 
-Utan argument verifierar kommandot installationen. En lokalt sparad
-föreningsdokumentsida kan importeras med:
+Utan argument verifierar kommandot installationen. Standardsidan kan hämtas och
+importeras direkt med:
+
+```console
+$ hembygd import-url
+Imported N entries and M documents from Haninge Hembygdsgille
+```
+
+En annan sida kan anges som argument:
+
+```bash
+hembygd import-url https://www.hembygd.se/example/foreningsdokument
+```
+
+En lokalt sparad föreningsdokumentsida kan importeras utan nätverksanrop med:
 
 ```console
 $ hembygd import-html foreningsdokument.html
@@ -25,8 +38,8 @@ Tillgängliga alternativ:
 - `--source-url` anger originalsidans URL
 - `--site-name` anger informationskällans namn
 
-Kommandot läser endast HTML-filen. Det hämtar eller laddar inte ned innehåll från
-internet.
+`import-url` hämtar endast HTML-sidan. Länkade dokument laddas ännu inte ned.
+`import-html` gör inga nätverksanrop.
 
 ## Framtida API
 

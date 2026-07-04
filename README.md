@@ -11,8 +11,9 @@ organisering och publicering av kulturhistoriskt material.
 
 Projektet är i en tidig utvecklingsfas. Den tekniska grunden, domänmodellen och
 den första importfunktionen finns på plats. Verktyget kan läsa en lokalt sparad
-föreningsdokumentsida från Hembygd.se och omvandla innehållet till domänobjekt.
-Nedladdning, organisering och publicering är ännu inte implementerade.
+föreningsdokumentsida från Hembygd.se eller hämta sidan direkt från webben och
+omvandla innehållet till domänobjekt. Dokumentnedladdning, organisering och
+publicering är ännu inte implementerade.
 
 Det nuvarande kommandot verifierar installationen:
 
@@ -21,19 +22,25 @@ $ hembygd
 Hembygd Verktyg
 ```
 
-En sparad Hembygd.se-sida kan analyseras med:
+Haninge Hembygdsgilles föreningsdokumentsida kan hämtas och analyseras med:
+
+```bash
+hembygd import-url
+```
+
+En redan sparad Hembygd.se-sida kan analyseras utan nätverksanrop med:
 
 ```bash
 hembygd import-html foreningsdokument.html
 ```
 
-Kommandot använder för närvarande Haninge Hembygdsgilles föreningsdokumentsida
-som standardkälla. `--source-url` och `--site-name` kan användas för att ange
-andra värden.
+Kommandona använder Haninge Hembygdsgilles föreningsdokumentsida som
+standardkälla. En annan URL kan skickas till `import-url`. `--source-url` och
+`--site-name` kan användas med lokal HTML.
 
 ## Planerade funktioner
 
-- hämtning av sidor och dokument från Hembygd.se och andra informationskällor
+- nedladdning av dokument från Hembygd.se och andra informationskällor
 - automatisk organisering av digitala arkiv
 - generering av README-filer och index
 - export till JSON och andra öppna format

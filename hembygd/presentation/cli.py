@@ -5,7 +5,9 @@ import sys
 from collections.abc import Sequence
 from pathlib import Path
 
-from hembygd.application import ImportHtml
+from hembygd.application import ImportHtml, ImportUrl
+from hembygd.domain import Site
+from hembygd.infrastructure.http import PageFetchError, UrlLibPageFetcher
 from hembygd.infrastructure.parsers import HembygdParseError, HembygdParser
 
 DEFAULT_SOURCE_URL = "https://www.hembygd.se/haninge-hembygdsgille/foreningsdokument"
@@ -23,6 +25,8 @@ def main(argv: Sequence[str] | None = None) -> int:
     namespace = parser.parse_args(arguments)
     if namespace.command == "import-html":
         return _import_html(namespace)
+    if namespace.command == "import-url":
+        return _import_url(namespace)
     parser.error(f"unknown command: {namespace.command}")
 
 
@@ -36,6 +40,12 @@ def _argument_parser() -> argparse.ArgumentParser:
     import_parser.add_argument("path", type=Path, help="path to a saved HTML file")
     import_parser.add_argument("--source-url", default=DEFAULT_SOURCE_URL)
     import_parser.add_argument("--site-name", default=DEFAULT_SITE_NAME)
+    url_parser = subparsers.add_parser(
+        "import-url",
+        help="fetch and parse a Hembygd.se document page",
+    )
+    url_parser.add_argument("url", nargs="?", default=DEFAULT_SOURCE_URL)
+    url_parser.add_argument("--site-name", default=DEFAULT_SITE_NAME)
     return parser
 
 
@@ -51,6 +61,24 @@ def _import_html(namespace: argparse.Namespace) -> int:
         print(f"Could not import HTML: {error}", file=sys.stderr)
         return 1
 
+    _print_import_summary(site)
+    return 0
+
+
+def _import_url(namespace: argparse.Namespace) -> int:
+    try:
+        site = ImportUrl(fetcher=UrlLibPageFetcher(), parser=HembygdParser()).execute(
+            url=namespace.url,
+            site_name=namespace.site_name,
+        )
+    except (PageFetchError, HembygdParseError) as error:
+        print(f"Could not import URL: {error}", file=sys.stderr)
+        return 1
+
+    _print_import_summary(site)
+    return 0
+
+
+def _print_import_summary(site: Site) -> None:
     document_count = sum(len(entry.documents) for entry in site.entries)
     print(f"Imported {len(site.entries)} entries and {document_count} documents from {site.name}")
-    return 0

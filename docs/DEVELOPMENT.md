@@ -40,6 +40,16 @@ Båda kommandona ska för närvarande skriva `Hembygd Verktyg`.
 
 ## Testa HTML-import
 
+Den aktuella standardsidan kan hämtas och importeras direkt:
+
+```bash
+.venv/bin/hembygd import-url
+```
+
+HTTP-adaptern använder Python-standardbiblioteket och har timeout, tydlig
+User-Agent, HTML-kontroll och en gräns på 10 MiB. En annan URL kan anges som
+argument till `import-url`.
+
 Parsern kan köras mot en lokalt sparad Hembygd.se-sida:
 
 ```bash
@@ -47,8 +57,8 @@ Parsern kan köras mot en lokalt sparad Hembygd.se-sida:
 ```
 
 Använd `--source-url` och `--site-name` om filen kommer från en annan sida eller
-förening. Parsern utför inga nätverksanrop; HTML-hämtning är ett separat framtida
-ansvar.
+förening. `import-html` utför inga nätverksanrop, vilket gör kommandot lämpligt
+för reproducerbar felsökning.
 
 HTML tolkas med Beautiful Soup. Beroendet valdes framför standardbibliotekets
 lägre nivå eftersom sidans redigerade HTML innehåller varierande nästling,
