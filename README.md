@@ -1,5 +1,7 @@
 # Hembygd Verktyg
 
+[![CI](https://github.com/haningehembygd/hembygd-verktyg/actions/workflows/ci.yml/badge.svg)](https://github.com/haningehembygd/hembygd-verktyg/actions/workflows/ci.yml)
+
 Hembygd Verktyg är ett open source-projekt från Haninge Hembygdsgille.
 
 Projektets mål är att utveckla moderna verktyg för digitalisering, import,
