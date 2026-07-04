@@ -5,8 +5,9 @@ import sys
 from collections.abc import Sequence
 from pathlib import Path
 
-from hembygd.application import ImportHtml, ImportUrl
+from hembygd.application import ExportSite, ImportHtml, ImportUrl
 from hembygd.domain import Site
+from hembygd.infrastructure.exporters import JsonExportError, JsonSiteExporter
 from hembygd.infrastructure.http import PageFetchError, UrlLibPageFetcher
 from hembygd.infrastructure.parsers import HembygdParseError, HembygdParser
 
@@ -40,12 +41,14 @@ def _argument_parser() -> argparse.ArgumentParser:
     import_parser.add_argument("path", type=Path, help="path to a saved HTML file")
     import_parser.add_argument("--source-url", default=DEFAULT_SOURCE_URL)
     import_parser.add_argument("--site-name", default=DEFAULT_SITE_NAME)
+    import_parser.add_argument("--output", type=Path, help="write imported data as JSON")
     url_parser = subparsers.add_parser(
         "import-url",
         help="fetch and parse a Hembygd.se document page",
     )
     url_parser.add_argument("url", nargs="?", default=DEFAULT_SOURCE_URL)
     url_parser.add_argument("--site-name", default=DEFAULT_SITE_NAME)
+    url_parser.add_argument("--output", type=Path, help="write imported data as JSON")
     return parser
 
 
@@ -57,7 +60,8 @@ def _import_html(namespace: argparse.Namespace) -> int:
             source_url=namespace.source_url,
             site_name=namespace.site_name,
         )
-    except (OSError, UnicodeError, HembygdParseError) as error:
+        _export_if_requested(site, namespace.output)
+    except (OSError, UnicodeError, HembygdParseError, JsonExportError) as error:
         print(f"Could not import HTML: {error}", file=sys.stderr)
         return 1
 
@@ -71,7 +75,8 @@ def _import_url(namespace: argparse.Namespace) -> int:
             url=namespace.url,
             site_name=namespace.site_name,
         )
-    except (PageFetchError, HembygdParseError) as error:
+        _export_if_requested(site, namespace.output)
+    except (PageFetchError, HembygdParseError, JsonExportError) as error:
         print(f"Could not import URL: {error}", file=sys.stderr)
         return 1
 
@@ -82,3 +87,10 @@ def _import_url(namespace: argparse.Namespace) -> int:
 def _print_import_summary(site: Site) -> None:
     document_count = sum(len(entry.documents) for entry in site.entries)
     print(f"Imported {len(site.entries)} entries and {document_count} documents from {site.name}")
+
+
+def _export_if_requested(site: Site, destination: Path | None) -> None:
+    if destination is None:
+        return
+    ExportSite(exporter=JsonSiteExporter()).execute(site=site, destination=destination)
+    print(f"Exported JSON to {destination}")

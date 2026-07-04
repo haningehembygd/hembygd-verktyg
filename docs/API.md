@@ -41,6 +41,34 @@ Tillgängliga alternativ:
 `import-url` hämtar endast HTML-sidan. Länkade dokument laddas ännu inte ned.
 `import-html` gör inga nätverksanrop.
 
+## JSON-export
+
+Båda importkommandona accepterar `--output`:
+
+```bash
+hembygd import-url --output output/archive.json
+hembygd import-html foreningsdokument.html --output output/archive.json
+```
+
+JSON-dokumentets toppnivå är:
+
+```json
+{
+  "schema_version": 1,
+  "site": {
+    "name": "Haninge Hembygdsgille",
+    "entries": []
+  }
+}
+```
+
+Det verkliga `site`-objektet innehåller webbplatsfält, metadata och alla entries.
+Varje entry innehåller metadata, dokument och assets. Datum använder ISO 8601,
+enumvärden skrivs som strängar och valfria värden representeras som `null`.
+
+Schemakontraktet definieras i
+[ADR-0003](adr/0003-versioned-json-export.md).
+
 ## Framtida API
 
 Ett framtida API ska byggas ovanpå application-lagrets användningsfall och

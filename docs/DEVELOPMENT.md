@@ -50,6 +50,15 @@ HTTP-adaptern använder Python-standardbiblioteket och har timeout, tydlig
 User-Agent, HTML-kontroll och en gräns på 10 MiB. En annan URL kan anges som
 argument till `import-url`.
 
+Spara importresultatet som JSON:
+
+```bash
+.venv/bin/hembygd import-url --output output/archive.json
+```
+
+JSON-exportern skriver UTF-8, bevarar svenska tecken och ersätter målfilen
+atomiskt. Formatet har en explicit schemaversion och definieras i ADR-0003.
+
 Parsern kan köras mot en lokalt sparad Hembygd.se-sida:
 
 ```bash

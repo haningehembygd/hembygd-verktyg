@@ -28,6 +28,12 @@ Haninge Hembygdsgilles föreningsdokumentsida kan hämtas och analyseras med:
 hembygd import-url
 ```
 
+Spara samtidigt hela resultatet som versionshanterad JSON:
+
+```bash
+hembygd import-url --output output/archive.json
+```
+
 En redan sparad Hembygd.se-sida kan analyseras utan nätverksanrop med:
 
 ```bash
@@ -43,7 +49,7 @@ standardkälla. En annan URL kan skickas till `import-url`. `--source-url` och
 - nedladdning av dokument från Hembygd.se och andra informationskällor
 - automatisk organisering av digitala arkiv
 - generering av README-filer och index
-- export till JSON och andra öppna format
+- export till ytterligare öppna format
 - publicering till GitHub och webbplatser
 - stöd för framtida API:er och integrationer
 

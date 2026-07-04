@@ -8,6 +8,12 @@ Hämta och analysera Haninge Hembygdsgilles föreningsdokumentsida:
 hembygd import-url
 ```
 
+Spara resultatet för vidare användning:
+
+```bash
+hembygd import-url --output output/archive.json
+```
+
 ## Importera en annan URL
 
 ```bash
@@ -33,5 +39,6 @@ hembygd import-html sida.html \
   --site-name "Exempelföreningen"
 ```
 
-Kommandona visar hur många poster och dokument som hittades. De länkade
+Kommandona visar hur många poster och dokument som hittades. Alternativet
+`--output` kan användas med både `import-url` och `import-html`. De länkade
 dokumentfilerna laddas ännu inte ned.
