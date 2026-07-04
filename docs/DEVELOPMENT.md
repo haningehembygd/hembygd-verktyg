@@ -38,6 +38,23 @@ Verifiera installationen:
 
 Båda kommandona ska för närvarande skriva `Hembygd Verktyg`.
 
+## Testa HTML-import
+
+Parsern kan köras mot en lokalt sparad Hembygd.se-sida:
+
+```bash
+.venv/bin/hembygd import-html foreningsdokument.html
+```
+
+Använd `--source-url` och `--site-name` om filen kommer från en annan sida eller
+förening. Parsern utför inga nätverksanrop; HTML-hämtning är ett separat framtida
+ansvar.
+
+HTML tolkas med Beautiful Soup. Beroendet valdes framför standardbibliotekets
+lägre nivå eftersom sidans redigerade HTML innehåller varierande nästling,
+icke-brytande blanksteg och historiska markupskillnader. Beroendet hålls inom
+huvudversion 4 för att undvika oväntade kompatibilitetsbrott.
+
 ## Projektstruktur
 
 ```text
@@ -45,7 +62,7 @@ hembygd/
 ├── presentation/     # CLI och framtida användargränssnitt
 ├── application/      # Användningsfall och komponentgränssnitt
 ├── domain/           # Domänobjekt och affärsregler
-└── infrastructure/   # Tekniska adaptrar
+└── infrastructure/   # Tekniska adaptrar, inklusive Hembygd-parsern
 ```
 
 Skapa inte nya generella `core`- eller `utils`-moduler. Placera kod i det lager

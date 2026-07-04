@@ -6,11 +6,32 @@ from hembygd.presentation.cli import main
 
 
 def test_main_prints_application_name(capsys) -> None:
-    main()
+    exit_code = main([])
 
     captured = capsys.readouterr()
 
+    assert exit_code == 0
     assert captured.out == "Hembygd Verktyg\n"
+
+
+def test_import_html_reports_imported_counts(capsys) -> None:
+    fixture_path = Path(__file__).parent / "fixtures" / "hembygd_documents.html"
+
+    exit_code = main(["import-html", str(fixture_path)])
+
+    captured = capsys.readouterr()
+
+    assert exit_code == 0
+    assert captured.out == "Imported 4 entries and 7 documents from Haninge Hembygdsgille\n"
+
+
+def test_import_html_reports_missing_file(capsys) -> None:
+    exit_code = main(["import-html", "missing.html"])
+
+    captured = capsys.readouterr()
+
+    assert exit_code == 1
+    assert "Could not import HTML:" in captured.err
 
 
 def test_declared_console_script_resolves() -> None:
