@@ -1,6 +1,6 @@
 # DOMAIN MODEL
 
-**Version:** 1.0  
+**Version:** 1.1
 **Status:** Godkänd
 
 ---
@@ -82,6 +82,17 @@ En Site innehåller information om:
 
 En Site innehåller ett antal Entries.
 
+## Fält
+
+| Fält | Typ | Krav |
+| --- | --- | --- |
+| `name` | `str` | Obligatoriskt, får inte vara tomt |
+| `base_url` | `str` | Obligatoriskt, får inte vara tomt |
+| `language` | `str \| None` | Valfritt |
+| `description` | `str \| None` | Valfritt |
+| `metadata` | `Metadata` | Standardvärde: tom metadata |
+| `entries` | `tuple[Entry, ...]` | Standardvärde: tom tuple |
+
 ---
 
 # Entry
@@ -119,6 +130,19 @@ En Entry beskriver:
 - resurser
 - metadata
 
+## Fält
+
+| Fält | Typ | Krav |
+| --- | --- | --- |
+| `title` | `str` | Obligatoriskt, får inte vara tomt |
+| `entry_type` | `EntryType` | Obligatoriskt |
+| `description` | `str \| None` | Valfritt |
+| `date` | `date \| None` | Valfritt |
+| `category` | `str \| None` | Valfritt |
+| `documents` | `tuple[Document, ...]` | Standardvärde: tom tuple |
+| `assets` | `tuple[Asset, ...]` | Standardvärde: tom tuple |
+| `metadata` | `Metadata` | Standardvärde: tom metadata |
+
 ---
 
 # EntryType
@@ -136,6 +160,16 @@ Exempel:
 - Other
 
 Projektet ska enkelt kunna utökas med nya typer.
+
+## Värden
+
+- `MEETING`
+- `EVENT`
+- `NEWS`
+- `PUBLICATION`
+- `ARTICLE`
+- `PAGE`
+- `OTHER`
 
 ---
 
@@ -170,6 +204,19 @@ Document beskriver endast dokumentet.
 
 Det beskriver inte var dokumentet hittades.
 
+## Fält
+
+| Fält | Typ | Krav |
+| --- | --- | --- |
+| `title` | `str` | Obligatoriskt, får inte vara tomt |
+| `url` | `str` | Obligatoriskt, får inte vara tomt |
+| `filename` | `str` | Obligatoriskt, får inte vara tomt |
+| `mime_type` | `str \| None` | Valfritt |
+| `size_bytes` | `int \| None` | Valfritt, får inte vara negativt |
+| `checksum` | `str \| None` | Valfritt |
+| `local_path` | `Path \| None` | Valfritt |
+| `metadata` | `Metadata` | Standardvärde: tom metadata |
+
 ---
 
 # Asset
@@ -187,6 +234,12 @@ Exempel:
 - illustrationer
 
 Assets hanteras på samma sätt som Documents men representerar andra typer av innehåll.
+
+## Fält
+
+`Asset` använder samma fält och grundläggande validering som `Document`. Den
+separata typen gör skillnaden mellan dokument och andra resurser uttrycklig i
+domänspråket.
 
 ---
 
@@ -207,6 +260,24 @@ Metadata kan beskriva:
 
 Metadata ska kunna utökas utan att domänobjekten behöver ändras.
 
+## Fält
+
+| Fält | Typ | Krav |
+| --- | --- | --- |
+| `author` | `str \| None` | Valfritt |
+| `language` | `str \| None` | Valfritt |
+| `license` | `str \| None` | Valfritt |
+| `category` | `str \| None` | Valfritt |
+| `tags` | `tuple[str, ...]` | Standardvärde: tom tuple |
+| `created_at` | `datetime \| None` | Valfritt |
+| `modified_at` | `datetime \| None` | Valfritt |
+| `source` | `str \| None` | Valfritt |
+| `attributes` | `tuple[tuple[str, str], ...]` | Utökningsfält med unika nycklar |
+
+`attributes` används endast för källspecifik metadata som saknar ett etablerat
+domänfält. När ett värde får en stabil betydelse ska det läggas till som ett
+namngivet fält i `Metadata`.
+
 ---
 
 # Relationer
@@ -221,6 +292,10 @@ En Entry kan innehålla:
 Både Site och Entry kan innehålla Metadata.
 
 Document och Asset kan också innehålla egen Metadata.
+
+Alla domänobjekt är immutabla dataklasser med `slots=True`. Samlingar lagras som
+tuples så att immutabiliteten gäller hela objektgrafen. Konstruktorerna är
+keyword-only för att fältens betydelse ska vara tydlig vid användning.
 
 ---
 
